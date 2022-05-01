@@ -9,51 +9,51 @@ package pb;
 // ------------------------------------
 
 {{range $table := .Tables}}
-//--------------------------------{{$table}}--------------------------------
-message {{$table}} {
+//--------------------------------{{$table.Name}}--------------------------------
+message {{$table.Name}} {
   int64 id = 1; //id
   string name = 2; //name
 }
 
-message Add{{$table}}Req {
+message Add{{$table.Name}}Req {
   string name = 1; //name
 }
 
-message Add{{$table}}Resp {
+message Add{{$table.Name}}Resp {
 }
 
-message Update{{$table}}Req {
+message Update{{$table.Name}}Req {
   int64 id = 1; //id
   string name = 2; //name
 }
 
-message Update{{$table}}Resp {
+message Update{{$table.Name}}Resp {
 }
 
-message Del{{$table}}Req {
+message Del{{$table.Name}}Req {
   int64 id = 1; //id
 }
 
-message Del{{$table}}Resp {
+message Del{{$table.Name}}Resp {
 }
 
-message Get{{$table}}ByIdReq {
+message Get{{$table.Name}}ByIdReq {
   int64 id = 1; //id
 }
 
-message Get{{$table}}ByIdResp {
-  {{$table}} {{$table}} = 1; //{{$table}}
+message Get{{$table.Name}}ByIdResp {
+  {{$table.Name}} {{$table.Name}} = 1; //{{$table.Name}}
 }
 
-message Search{{$table}}Req {
+message Search{{$table.Name}}Req {
   int64 page = 1;       //page
   int64 pageSize = 2;   //pageSize
   int64 id = 3;         //id
   string name = 4;      //name
 }
 
-message Search{{$table}}Resp {
-  repeated {{$table}} {{$table}} = 1; //{{$table}}
+message Search{{$table.Name}}Resp {
+  repeated {{$table.Name}} {{$table.Name}} = 1; //{{$table.Name}}
 }
 {{end}}
 
@@ -61,11 +61,11 @@ message Search{{$table}}Resp {
 service {{.Srv}}{
 
     {{range $table := .Tables}}
-    //-----------------------{{$table}}-----------------------
-    rpc Add{{$table}}(Add{{$table}}Req) returns (Add{{$table}}Resp);
-    rpc Update{{$table}}(Update{{$table}}Req) returns (Update{{$table}}Resp);
-    rpc Del{{$table}}(Del{{$table}}Req) returns (Del{{$table}}Resp);
-    rpc Get{{$table}}ById(Get{{$table}}ByIdReq) returns (Get{{$table}}ByIdResp);
-    rpc Search{{$table}}(Search{{$table}}Req) returns (Search{{$table}}Resp);
+    //-----------------------{{$table.Name}}-----------------------
+    rpc Add{{$table.Name}}(Add{{$table.Name}}Req) returns (Add{{$table.Name}}Resp);
+    rpc Update{{$table.Name}}(Update{{$table.Name}}Req) returns (Update{{$table.Name}}Resp);
+    rpc Del{{$table.Name}}(Del{{$table.Name}}Req) returns (Del{{$table.Name}}Resp);
+    rpc Get{{$table.Name}}ById(Get{{$table.Name}}ByIdReq) returns (Get{{$table.Name}}ByIdResp);
+    rpc Search{{$table.Name}}(Search{{$table.Name}}Req) returns (Search{{$table.Name}}Resp);
     {{end}}
 }

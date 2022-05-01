@@ -1,4 +1,4 @@
-package gen_sql_pb
+package main
 
 import (
 	"os"

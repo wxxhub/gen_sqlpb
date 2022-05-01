@@ -1,7 +1,36 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	//_ "github.com/go-sql-driver/mysql"
+)
 
-func GenerateSchema(db *sql.DB, table string) {
+type Columns struct {
+	Field      string
+	Type       string
+	Collation  string
+	Null       string
+	Key        string
+	Default    string
+	Extra      string
+	Privileges string
+	Comment    string
+}
 
+func GenerateSchema(db *sql.DB, table string) ([]*Columns, error) {
+	rows, err := db.Query("SHOW FULL COLUMNS FROM new_table")
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	cols := make([]*Columns, 0)
+	for rows.Next() {
+		c := new(Columns)
+		rows.Scan(&c.Field, &c.Type, &c.Collation, &c.Null, &c.Key, &c.Default, &c.Extra, &c.Privileges, &c.Comment)
+		cols = append(cols, c)
+	}
+
+	return cols, nil
 }
