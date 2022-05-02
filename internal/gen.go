@@ -14,8 +14,9 @@ import (
 var protoTpl string
 
 type Table struct {
-	Name    string
-	Columns map[string]string
+	Name      string
+	UpperName string
+	Columns   map[string]string
 }
 
 type Content struct {
@@ -25,8 +26,9 @@ type Content struct {
 
 func GenProto(cols []*db.Columns, srv string, tableName string, savePath string) {
 	table := &Table{
-		Name:    tableName,
-		Columns: genTableContent(cols),
+		Name:      tableName,
+		UpperName: toCamelWithStartUpper(tableName),
+		Columns:   genTableContent(cols),
 	}
 
 	content := &Content{
@@ -34,14 +36,12 @@ func GenProto(cols []*db.Columns, srv string, tableName string, savePath string)
 		Tables: []*Table{table},
 	}
 
-	//log.Println("cols:", cols)
-
 	tmpl, err := template.New("test").Parse(protoTpl)
 	if err != nil {
 		panic(err)
 	}
 	//path := os.F
-	f, err := os.OpenFile("test.proto", os.O_CREATE|os.O_RDWR, os.ModeAppend)
+	f, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -87,4 +87,15 @@ func genTableContent(cols []*db.Columns) map[string]string {
 
 	log.Println("m:", m)
 	return m
+}
+
+func toCamelWithStartUpper(str string) string {
+	r := ""
+	strs := strings.Split(str, "_")
+	for _, item := range strs {
+		r += strings.ToUpper(item[0:1])
+		r += item[1:]
+	}
+
+	return r
 }

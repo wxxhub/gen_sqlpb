@@ -18,6 +18,12 @@ type Columns struct {
 }
 
 func GenerateSchema(db *sql.DB, table string) ([]*Columns, error) {
+	cols := make([]*Columns, 0)
+
+	if len(table) == 0 {
+		return cols, nil
+	}
+
 	rows, err := db.Query("SHOW FULL COLUMNS FROM new_table")
 
 	if err != nil {
@@ -25,7 +31,6 @@ func GenerateSchema(db *sql.DB, table string) ([]*Columns, error) {
 	}
 	defer rows.Close()
 
-	cols := make([]*Columns, 0)
 	for rows.Next() {
 		c := new(Columns)
 		rows.Scan(&c.Field, &c.Type, &c.Collation, &c.Null, &c.Key, &c.Default, &c.Extra, &c.Privileges, &c.Comment)
