@@ -4,6 +4,17 @@ option go_package ="./pb";
 
 package pb;
 
+service {{.Srv}}{
+    {{range $table := .Tables -}}
+    //-----------------------{{$table.UpperName}}-----------------------
+    rpc Add{{$table.UpperName}}(Add{{$table.UpperName}}Req) returns (Add{{$table.UpperName}}Resp);
+    rpc Update{{$table.UpperName}}(Update{{$table.UpperName}}Req) returns (Update{{$table.UpperName}}Resp);
+    rpc Del{{$table.UpperName}}(Del{{$table.UpperName}}Req) returns (Del{{$table.UpperName}}Resp);
+    rpc Get{{$table.UpperName}}ById(Get{{$table.UpperName}}ByIdReq) returns (Get{{$table.UpperName}}ByIdResp);
+    rpc Search{{$table.UpperName}}(Search{{$table.UpperName}}Req) returns (Search{{$table.UpperName}}Resp);
+    {{- end}}
+}
+
 {{range $table := .Tables}}
 //--------------------------------{{$table.Name}}--------------------------------
 message {{$table.UpperName}} {
@@ -52,14 +63,3 @@ message Search{{$table.UpperName}}Resp {
   repeated {{$table.UpperName}} {{$table.Name}} = 1; //{{$table.UpperName}}
 }
 {{end}}
-
-service {{.Srv}}{
-    {{range $table := .Tables -}}
-    //-----------------------{{$table.UpperName}}-----------------------
-    rpc Add{{$table.UpperName}}(Add{{$table.UpperName}}Req) returns (Add{{$table.UpperName}}Resp);
-    rpc Update{{$table.UpperName}}(Update{{$table.UpperName}}Req) returns (Update{{$table.UpperName}}Resp);
-    rpc Del{{$table.UpperName}}(Del{{$table.UpperName}}Req) returns (Del{{$table.UpperName}}Resp);
-    rpc Get{{$table.UpperName}}ById(Get{{$table.UpperName}}ByIdReq) returns (Get{{$table.UpperName}}ByIdResp);
-    rpc Search{{$table.UpperName}}(Search{{$table.UpperName}}Req) returns (Search{{$table.UpperName}}Resp);
-    {{- end}}
-}
