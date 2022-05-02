@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
-	gen "github.com/wxxhub/gen_sql_pb/internal"
-	idb "github.com/wxxhub/gen_sql_pb/internal/db"
+	gen "github.com/wxxhub/gen_sqlpb/internal"
+	idb "github.com/wxxhub/gen_sqlpb/internal/db"
 	"log"
 	"path/filepath"
 )

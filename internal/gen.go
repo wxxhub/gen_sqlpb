@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/wxxhub/gen_sql_pb/internal/db"
+	"github.com/wxxhub/gen_sqlpb/internal/db"
 	"html/template"
 	"log"
 	"os"
