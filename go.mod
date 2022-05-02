@@ -1,4 +1,4 @@
-module github.com/wxxhub/gen_sql_pb
+module github.com/wxxhub/gen_sqlpb
 
 go 1.17
 
