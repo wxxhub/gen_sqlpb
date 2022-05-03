@@ -20,7 +20,6 @@ func main() {
 
 	//packageName := flag.String("package", *schema, "the protocol buffer package. defaults to the database schema.")
 	//goPackageName := flag.String("go_package", "", "the protocol buffer go_package. defaults to the database schema.")
-	//ignoreTableStr := flag.String("ignore_tables", "", "a comma spaced list of tables to ignore")
 
 	db, err := sql.Open("mysql", *dsn)
 	if err != nil {
