@@ -3,20 +3,50 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"log"
+	"path/filepath"
+
 	_ "github.com/go-sql-driver/mysql"
 	gen "github.com/wxxhub/gen_sqlpb/internal"
 	idb "github.com/wxxhub/gen_sqlpb/internal/db"
-	"log"
-	"path/filepath"
 )
+
+type TableConfig struct {
+	mysqldsn       string
+	tableName string
+}
+
+type Config struct {
+	tableConfigs []TableConfig
+	serviceName  string
+	savePath     string
+}
+
+func parseTableConfig(dsn) {
+
+}
+
+func parseFlag() *Config {
+	config := &Config{
+		tableConfigs: make([]TableConfig, 0),
+	}
+	flag.Parse()
+
+	for i := 0; i < flag.NArg(); i++ {
+		switch flag.Arg(i) {
+		case "dsn":
+
+		}
+	}
+
+	return config
+}
 
 func main() {
 	dsn := flag.String("dsn", "", "the database dsn")
 	serviceName := flag.String("srv", "", "the protobuf service name , defaults to the database schema.")
 	savePath := flag.String("save_path", "", "the protobuf service name , defaults to the database schema.")
 	tableName := flag.String("table_name", "", "the protobuf service name , defaults to the database schema.")
-
-	flag.Parse()
 
 	//packageName := flag.String("package", *schema, "the protocol buffer package. defaults to the database schema.")
 	//goPackageName := flag.String("go_package", "", "the protocol buffer go_package. defaults to the database schema.")
