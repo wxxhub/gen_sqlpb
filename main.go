@@ -5,37 +5,48 @@ import (
 	"flag"
 	"log"
 	"path/filepath"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	gen "github.com/wxxhub/gen_sqlpb/internal"
 	idb "github.com/wxxhub/gen_sqlpb/internal/db"
 )
 
-type TableConfig struct {
-	mysqldsn       string
+type SqlConfig struct {
+	sqldsn    string
 	tableName string
 }
 
-type Config struct {
-	tableConfigs []TableConfig
-	serviceName  string
-	savePath     string
+type GenConfig struct {
+	sqlConfigs  []*SqlConfig
+	serviceName string
+	savePath    string
 }
 
-func parseTableConfig(dsn) {
+func parseTableConfig(dsn string) *SqlConfig {
+	a := strings.Split(dsn, "?")
+	p := a[0]
 
+	if len(a) > 1 {
+		paramStr := a[1]
+	}
+	
 }
 
-func parseFlag() *Config {
-	config := &Config{
-		tableConfigs: make([]TableConfig, 0),
+func parseFlag() *GenConfig {
+	config := &GenConfig{
+		sqlConfigs: make([]*SqlConfig, 0),
 	}
 	flag.Parse()
 
 	for i := 0; i < flag.NArg(); i++ {
 		switch flag.Arg(i) {
 		case "dsn":
-
+			config.sqlConfigs = append(config.sqlConfigs, parseTableConfig(flag.Arg(i)))
+		case "servive_name":
+			config.serviceName = flag.Arg(i)
+		case "save_path":
+			config.savePath = flag.Arg(i)
 		}
 	}
 
