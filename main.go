@@ -1,11 +1,11 @@
 package main
 
 import (
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 	"github.com/wxxhub/gen_sqlpb/internal/db"
 	"github.com/wxxhub/gen_sqlpb/internal/flag"
 	"github.com/wxxhub/gen_sqlpb/internal/gen"
+
 	"os"
 	"strings"
 )
