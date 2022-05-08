@@ -13,8 +13,8 @@ type Option struct {
 	DSN       []string `long:"dsn" description:"dsn"`
 	Debug     bool     `long:"debug" description:"debug"`
 	Package   string   `long:"package" description:"protobuf package"`
-	GoPackage string   `long:"go_package" description:"golang package"`
-	FileName  string   `long:"file_name" description:"golang package"`
+	GoPackage string   `long:"goPackage" description:"golang package"`
+	FileName  string   `long:"fileName" description:"protobuf file name"`
 }
 
 func parseTableConfig(dsn string) *config.SqlConfig {

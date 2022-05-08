@@ -8,12 +8,15 @@ go install github.com/wxxhub/gen_sqlpb@latest
 ```
 
 ## params
-| param      | description            |
-|:-----------|:-----------------------|
-| --srvName  | Service name           |
-| --dsn      | Database source name   |
-| --debug    | Print debug info       |
-| --SavePath | The path to save proto |
+| param        | description             | must |
+|:-------------|:------------------------|------|
+| --srvName    | Service name            | *    |
+| --dsn        | Database source name    | *    |
+| --debug      | Print debug info        |      |
+| --SavePath   | The path to save proto  |      |
+| --package    | protobuf package name   |      |
+| --goPackage  | golang package name     |      |
+| --fileName   | protobuf file name      |      |
 
 
 ## use
