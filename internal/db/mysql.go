@@ -2,25 +2,19 @@ package db
 
 import (
 	"database/sql"
-	//_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
-type Columns struct {
-	Field      string
-	Type       string
-	Collation  string
-	Null       string
-	Key        string
-	Default    string
-	Extra      string
-	Privileges string
-	Comment    string
-}
+func GenerateMysqlSchema(dsn, table string) ([]*Columns, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
 
-func GenerateSchema(db *sql.DB, table string) ([]*Columns, error) {
 	cols := make([]*Columns, 0)
 
 	if len(table) == 0 {
+		logrus.Warnf("table is empty, dsn: %s", dsn)
 		return cols, nil
 	}
 

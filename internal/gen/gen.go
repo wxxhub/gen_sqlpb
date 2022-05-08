@@ -1,9 +1,9 @@
-package internal
+package gen
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/wxxhub/gen_sqlpb/internal/db"
 	"html/template"
-	"log"
 	"os"
 	"strings"
 
@@ -40,20 +40,20 @@ func GenProto(colsMap map[string][]*db.Columns, srv string, savePath string) {
 		Tables: tables,
 	}
 
-	tmpl, err := template.New("test").Parse(protoTpl)
+	tmpl, err := template.New("gen_proto").Parse(protoTpl)
 	if err != nil {
-		panic(err)
-	}
-	//path := os.F
-	f, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
-	if err != nil {
-		panic(err)
+		logrus.Panicf("Parse proto template faile: %s", err.Error())
 	}
 
+	f, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	if err != nil {
+		logrus.Panicf("OpenFile %s faile: %s", savePath, err.Error())
+	}
 	defer f.Close()
+
 	err = tmpl.Execute(f, content)
 	if err != nil {
-		panic(err)
+		logrus.Panicf("Execute template faile:%s", err.Error())
 	}
 }
 
@@ -86,10 +86,11 @@ func genTableContent(cols []*db.Columns) map[string]string {
 			m[item.Field] = "double"
 		default:
 			m[item.Field] = "string"
+			logrus.Warnf("%s use default type string", itemType)
 		}
 	}
 
-	log.Println("m:", m)
+	logrus.Debugf("genTableContent: %+v", m)
 	return m
 }
 

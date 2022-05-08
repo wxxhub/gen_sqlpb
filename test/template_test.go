@@ -8,7 +8,7 @@ import (
 	_ "embed"
 )
 
-//go:embed ../internal/template/proto.tpl
+//go:embed ../internal/gen/template/proto.tpl
 var protoTpl string
 
 func TestTemplate(t *testing.T) {
