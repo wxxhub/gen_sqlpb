@@ -23,8 +23,7 @@ func main() {
 	for _, item := range genConfig.SqlConfigs {
 		cols, err := db.GenerateSchema("mysql", item.SqlDsn, item.TableName)
 		if err != nil {
-			logrus.Errorf("GenerateSchema sql faile: %s", err.Error())
-			panic(err)
+			logrus.Panicf("GenerateSchema sql faile: %s", err.Error())
 		}
 		colsMap[item.TableName] = cols
 
