@@ -43,14 +43,17 @@ func parseTableConfig(dsn string) *SqlConfig {
 		}
 	}
 
-	//for key, value := paramMap {
+	//params := ""
+	//for key, value := range paramMap {
 	//	switch key {
-	//	case :
-	//
+	//	case "tableName":
+	//		params = fmt.Sprintf("%s?%s=%s", params, key, value)
 	//	}
 	//}
-
-	tableName := strings.Split(sqlDsn, "/")[1]
+	//if len(params) > 0 {
+	//	sqlDsn = fmt.Sprintf("%s?%s", sqlDsn, params)
+	//}
+	tableName := paramMap["tableName"]
 
 	return &SqlConfig{
 		sqlDsn:    sqlDsn,
@@ -81,6 +84,7 @@ func parseFlag() *GenConfig {
 func main() {
 	genConfig := parseFlag()
 
+	colsMap := make(map[string][]*idb.Columns)
 	for _, item := range genConfig.sqlConfigs {
 		db, err := sql.Open("mysql", item.sqlDsn)
 		if err != nil {
@@ -95,12 +99,13 @@ func main() {
 			//panic(err)
 		}
 
-		path := genConfig.srvName + ".proto"
-		if len(genConfig.savePath) > 0 {
-			path = filepath.Join(genConfig.savePath, path)
-		}
-
-		gen.GenProto(cols, genConfig.srvName, item.tableName, path)
+		colsMap[item.tableName] = cols
 	}
 
+	path := genConfig.srvName + ".proto"
+	if len(genConfig.savePath) > 0 {
+		path = filepath.Join(genConfig.savePath, path)
+	}
+
+	gen.GenProto(colsMap, genConfig.srvName, path)
 }

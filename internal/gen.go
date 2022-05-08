@@ -24,16 +24,20 @@ type Content struct {
 	Tables []*Table
 }
 
-func GenProto(cols []*db.Columns, srv string, tableName string, savePath string) {
-	table := &Table{
-		Name:      tableName,
-		UpperName: toCamelWithStartUpper(tableName),
-		Columns:   genTableContent(cols),
+func GenProto(colsMap map[string][]*db.Columns, srv string, savePath string) {
+
+	tables := make([]*Table, 0)
+	for tableName, item := range colsMap {
+		tables = append(tables, &Table{
+			Name:      tableName,
+			UpperName: toCamelWithStartUpper(tableName),
+			Columns:   genTableContent(item),
+		})
 	}
 
 	content := &Content{
 		Srv:    srv,
-		Tables: []*Table{table},
+		Tables: tables,
 	}
 
 	tmpl, err := template.New("test").Parse(protoTpl)
