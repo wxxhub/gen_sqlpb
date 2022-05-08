@@ -9,9 +9,9 @@ import (
 
 type Option struct {
 	SrvName   string   `long:"srvName" description:"service name"`
-	SavePath  string   `long:"savePath" description:"service name"`
-	DSN       []string `long:"dsn" description:"dsn"`
-	Debug     bool     `long:"debug" description:"debug"`
+	SavePath  string   `long:"savePath" description:"protobuf save path"`
+	DSN       []string `long:"dsn" description:"data source name"`
+	Debug     bool     `long:"debug" description:"print debug info"`
 	Package   string   `long:"package" description:"protobuf package"`
 	GoPackage string   `long:"goPackage" description:"golang package"`
 	FileName  string   `long:"fileName" description:"protobuf file name"`
