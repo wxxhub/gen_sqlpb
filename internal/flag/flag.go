@@ -8,10 +8,13 @@ import (
 )
 
 type Option struct {
-	SrvName  string   `short:"s" long:"srvName" description:"service name"`
-	SavePath string   `long:"savePath" description:"service name"`
-	DSN      []string `short:"d" long:"dsn" description:"dsn"`
-	Debug    bool     `long:"debug" description:"debug"`
+	SrvName   string   `long:"srvName" description:"service name"`
+	SavePath  string   `long:"savePath" description:"service name"`
+	DSN       []string `long:"dsn" description:"dsn"`
+	Debug     bool     `long:"debug" description:"debug"`
+	Package   string   `long:"package" description:"protobuf package"`
+	GoPackage string   `long:"go_package" description:"golang package"`
+	FileName  string   `long:"file_name" description:"golang package"`
 }
 
 func parseTableConfig(dsn string) *config.SqlConfig {
@@ -56,6 +59,8 @@ func ParseFlag() *config.GenConfig {
 	genConfig.SrvName = opt.SrvName
 	genConfig.SavePath = opt.SavePath
 	genConfig.Debug = opt.Debug
+	genConfig.GoPackage = opt.GoPackage
+	genConfig.Package = opt.Package
 
 	genConfig.SqlConfigs = make([]*config.SqlConfig, len(opt.DSN))
 

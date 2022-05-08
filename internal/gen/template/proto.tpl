@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package ="./pb";
+option go_package ="{{.GoPackage}}";
 
-package pb;
+package {{.Package}};
 
 service {{.Srv}} {
     {{range $table := .Tables}}

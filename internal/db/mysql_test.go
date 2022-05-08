@@ -23,7 +23,7 @@ func TestDbInfo(t *testing.T) {
 	}
 	fmt.Println("schema:", schema)
 
-	//var desc string
+	//var desc xstring
 	rows, err := db.Query("SHOW FULL COLUMNS FROM new_table")
 
 	if err != nil {
@@ -31,7 +31,7 @@ func TestDbInfo(t *testing.T) {
 	}
 	defer rows.Close()
 
-	//desc := make(map[string]string)
+	//desc := make(map[xstring]xstring)
 	for rows.Next() {
 		c := new(Columns)
 		fmt.Println(rows.Columns())

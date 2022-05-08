@@ -7,18 +7,20 @@ import (
 	"github.com/wxxhub/gen_sqlpb/internal/flag"
 	"github.com/wxxhub/gen_sqlpb/internal/gen"
 	"os"
-	"path/filepath"
+	"strings"
 )
 
 func main() {
 	genConfig := flag.ParseFlag()
 
+	// set log level
 	if genConfig.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 
+	// get data struct
 	colsMap := make(map[string][]*db.Columns)
 	for _, item := range genConfig.SqlConfigs {
 		cols, err := db.GenerateSchema("mysql", item.SqlDsn, item.TableName)
@@ -30,15 +32,23 @@ func main() {
 		logrus.Infof("gen table %s", item.TableName)
 	}
 
-	path := genConfig.SrvName + ".proto"
+	// config
+	if len(genConfig.Package) == 0 {
+		genConfig.Package = strings.ToLower(genConfig.SrvName)
+	}
+	if len(genConfig.GoPackage) == 0 {
+		genConfig.GoPackage = strings.ToLower(genConfig.SrvName)
+	}
 	if len(genConfig.SavePath) > 0 {
 		err := os.MkdirAll(genConfig.SavePath, os.ModePerm)
 		if err != nil {
 			logrus.Panicf("mkdir %s faile:%s", genConfig.SavePath, err.Error())
 		}
-
-		path = filepath.Join(genConfig.SavePath, path)
+	}
+	if len(genConfig.FileName) == 0 {
+		genConfig.FileName = genConfig.SrvName + ".proto"
 	}
 
-	gen.GenProto(colsMap, genConfig.SrvName, path)
+	// gen proto
+	gen.GenProto(genConfig, colsMap)
 }

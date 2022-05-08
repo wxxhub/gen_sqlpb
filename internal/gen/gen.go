@@ -2,9 +2,12 @@ package gen
 
 import (
 	"github.com/sirupsen/logrus"
+	"github.com/wxxhub/gen_sqlpb/internal/config"
 	"github.com/wxxhub/gen_sqlpb/internal/db"
+	"github.com/wxxhub/gen_sqlpb/internal/xstring"
 	"html/template"
 	"os"
+	"path/filepath"
 	"strings"
 
 	_ "embed"
@@ -20,24 +23,28 @@ type Table struct {
 }
 
 type Content struct {
-	Srv    string
-	Tables []*Table
+	Srv       string
+	Tables    []*Table
+	Package   string
+	GoPackage string
 }
 
-func GenProto(colsMap map[string][]*db.Columns, srv string, savePath string) {
+func GenProto(genConfig *config.GenConfig, colsMap map[string][]*db.Columns) {
 
 	tables := make([]*Table, 0)
 	for tableName, item := range colsMap {
 		tables = append(tables, &Table{
 			Name:      tableName,
-			UpperName: toCamelWithStartUpper(tableName),
+			UpperName: xstring.ToCamelWithStartUpper(tableName),
 			Columns:   genTableContent(item),
 		})
 	}
 
 	content := &Content{
-		Srv:    srv,
-		Tables: tables,
+		Srv:       genConfig.SrvName,
+		Tables:    tables,
+		Package:   genConfig.Package,
+		GoPackage: genConfig.GoPackage,
 	}
 
 	tmpl, err := template.New("gen_proto").Parse(protoTpl)
@@ -45,9 +52,10 @@ func GenProto(colsMap map[string][]*db.Columns, srv string, savePath string) {
 		logrus.Panicf("Parse proto template faile: %s", err.Error())
 	}
 
-	f, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	fullPath := filepath.Join(genConfig.SavePath, genConfig.FileName)
+	f, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
-		logrus.Panicf("OpenFile %s faile: %s", savePath, err.Error())
+		logrus.Panicf("OpenFile %s faile: %s", fullPath, err.Error())
 	}
 	defer f.Close()
 
@@ -63,7 +71,7 @@ func genTableContent(cols []*db.Columns) map[string]string {
 		itemType := strings.Split(item.Type, "(")[0]
 		switch itemType {
 		case "char", "varchar", "text", "longtext", "mediumtext", "tinytext", "enum", "set":
-			m[item.Field] = "string"
+			m[item.Field] = "xstring"
 		case "blob", "mediumblob", "longblob", "varbinary", "binary":
 			m[item.Field] = "bytes"
 		case "date", "time", "datetime", "timestamp":
@@ -85,22 +93,11 @@ func genTableContent(cols []*db.Columns) map[string]string {
 		case "float", "decimal", "double":
 			m[item.Field] = "double"
 		default:
-			m[item.Field] = "string"
-			logrus.Warnf("%s use default type string", itemType)
+			m[item.Field] = "xstring"
+			logrus.Warnf("%s use default type xstring", itemType)
 		}
 	}
 
 	logrus.Debugf("genTableContent: %+v", m)
 	return m
-}
-
-func toCamelWithStartUpper(str string) string {
-	r := ""
-	strs := strings.Split(str, "_")
-	for _, item := range strs {
-		r += strings.ToUpper(item[0:1])
-		r += item[1:]
-	}
-
-	return r
 }
