@@ -4,7 +4,7 @@ option go_package ="./pb";
 
 package pb;
 
-service {{.Srv}}{
+service {{.Srv}} {
     {{range $table := .Tables -}}
     //-----------------------{{$table.UpperName}}-----------------------
     rpc Add{{$table.UpperName}}(Add{{$table.UpperName}}Req) returns (Add{{$table.UpperName}}Resp);
@@ -16,7 +16,7 @@ service {{.Srv}}{
 }
 
 {{range $table := .Tables}}
-//--------------------------------{{$table.Name}}--------------------------------
+//--------------------------------{{$table.UpperName}}--------------------------------
 message {{$table.UpperName}} {
   int64 id = 1; //id
   string name = 2; //name
