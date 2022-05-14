@@ -29,7 +29,13 @@ type Content struct {
 	GoPackage string
 }
 
-func GenProto(genConfig *config.GenConfig, colsMap map[string][]*db.Columns) {
+func GenProto(serviceConfig *config.ServiceConfig, colsMap map[string][]*db.Columns) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			logrus.Errorln("GenProto err:", r)
+		}
+	}()
 
 	tables := make([]*Table, 0)
 	for tableName, item := range colsMap {
@@ -41,10 +47,10 @@ func GenProto(genConfig *config.GenConfig, colsMap map[string][]*db.Columns) {
 	}
 
 	content := &Content{
-		Srv:       genConfig.SrvName,
+		Srv:       serviceConfig.SrvName,
 		Tables:    tables,
-		Package:   genConfig.Package,
-		GoPackage: genConfig.GoPackage,
+		Package:   serviceConfig.Package,
+		GoPackage: serviceConfig.GoPackage,
 	}
 
 	tmpl, err := template.New("gen_proto").Parse(protoTpl)
@@ -52,7 +58,7 @@ func GenProto(genConfig *config.GenConfig, colsMap map[string][]*db.Columns) {
 		logrus.Panicf("Parse proto template faile: %s", err.Error())
 	}
 
-	fullPath := filepath.Join(genConfig.SavePath, genConfig.FileName)
+	fullPath := filepath.Join(serviceConfig.SavePath, serviceConfig.FileName)
 	f, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		logrus.Panicf("OpenFile %s faile: %s", fullPath, err.Error())

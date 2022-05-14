@@ -1,6 +1,9 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/sirupsen/logrus"
+)
 
 type Columns struct {
 	Field      string
@@ -15,6 +18,13 @@ type Columns struct {
 }
 
 func GenerateSchema(driverName, dsn, tableName string) ([]*Columns, error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			logrus.Errorln("GenerateSchema err:", r)
+		}
+	}()
+
 	switch driverName {
 	case "mysql":
 		return GenerateMysqlSchema(dsn, tableName)

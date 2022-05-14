@@ -3,14 +3,19 @@ package config
 type SqlConfig struct {
 	SqlDsn    string
 	TableName string
+	SrvName   string
 }
 
-type GenConfig struct {
-	SqlConfigs []*SqlConfig
+type ServiceConfig struct {
+	SqlConfigs map[string]*SqlConfig
 	SrvName    string
 	SavePath   string
 	FileName   string
-	Debug      bool
 	Package    string
 	GoPackage  string
+}
+
+type GlobalConfig struct {
+	Services map[string]*ServiceConfig
+	Debug    bool
 }

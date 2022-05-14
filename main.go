@@ -5,50 +5,58 @@ import (
 	"github.com/wxxhub/gen_sqlpb/internal/db"
 	"github.com/wxxhub/gen_sqlpb/internal/flag"
 	"github.com/wxxhub/gen_sqlpb/internal/gen"
-
 	"os"
+
 	"strings"
 )
 
 func main() {
-	genConfig := flag.ParseFlag()
-
+	defer func() {
+		r := recover()
+		if r != nil {
+			logrus.Errorln(r)
+		}
+	}()
+	serviceConfig := flag.ParseFlag()
 	// set log level
-	if genConfig.Debug {
+	if serviceConfig.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 
+	logrus.Debugln("serviceConfig: ", serviceConfig)
+
 	// get data struct
-	colsMap := make(map[string][]*db.Columns)
-	for _, item := range genConfig.SqlConfigs {
-		cols, err := db.GenerateSchema("mysql", item.SqlDsn, item.TableName)
-		if err != nil {
-			logrus.Panicf("GenerateSchema faile: %s", err.Error())
+	for _, srvConfig := range serviceConfig.Services {
+		colsMap := make(map[string][]*db.Columns)
+		for _, item := range srvConfig.SqlConfigs {
+			cols, err := db.GenerateSchema("mysql", item.SqlDsn, item.TableName)
+			if err != nil {
+				logrus.Panicf("GenerateSchema faile: %s", err.Error())
+			}
+			colsMap[item.TableName] = cols
 		}
-		colsMap[item.TableName] = cols
 
-		logrus.Infof("gen table %s", item.TableName)
-	}
-
-	// config
-	if len(genConfig.Package) == 0 {
-		genConfig.Package = strings.ToLower(genConfig.SrvName)
-	}
-	if len(genConfig.GoPackage) == 0 {
-		genConfig.GoPackage = strings.ToLower(genConfig.SrvName)
-	}
-	if len(genConfig.SavePath) > 0 {
-		err := os.MkdirAll(genConfig.SavePath, os.ModePerm)
-		if err != nil {
-			logrus.Panicf("mkdir %s faile:%s", genConfig.SavePath, err.Error())
+		// config
+		if len(srvConfig.Package) == 0 {
+			srvConfig.Package = strings.ToLower(srvConfig.SrvName)
 		}
-	}
-	if len(genConfig.FileName) == 0 {
-		genConfig.FileName = genConfig.SrvName + ".proto"
-	}
+		if len(srvConfig.GoPackage) == 0 {
+			srvConfig.GoPackage = strings.ToLower(srvConfig.SrvName)
+		}
 
-	// gen proto
-	gen.GenProto(genConfig, colsMap)
+		if len(srvConfig.SavePath) > 0 {
+			err := os.MkdirAll(srvConfig.SavePath, os.ModePerm)
+			if err != nil {
+				logrus.Panicf("mkdir %s faile:%s", srvConfig.SavePath, err.Error())
+			}
+		}
+		if len(srvConfig.FileName) == 0 {
+			srvConfig.FileName = srvConfig.SrvName + ".proto"
+		}
+
+		logrus.Debugln("srvConfig: ", srvConfig)
+		gen.GenProto(srvConfig, colsMap)
+	}
 }

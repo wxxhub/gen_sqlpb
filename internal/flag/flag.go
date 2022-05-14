@@ -3,6 +3,7 @@ package flag
 import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"github.com/sirupsen/logrus"
 	"github.com/wxxhub/gen_sqlpb/internal/config"
 	"strings"
 )
@@ -42,31 +43,55 @@ func parseTableConfig(dsn string) *config.SqlConfig {
 	//}
 	tableName := paramMap["tableName"]
 
-	return &config.SqlConfig{
+	c := &config.SqlConfig{
 		SqlDsn:    sqlDsn,
 		TableName: tableName,
 	}
+
+	if srvName, ok := paramMap["srvName"]; ok {
+		c.SrvName = srvName
+	}
+
+	return c
 }
 
-func ParseFlag() *config.GenConfig {
+func ParseFlag() (globalConfig *config.GlobalConfig) {
+	globalConfig = new(config.GlobalConfig)
+	defer func() {
+		r := recover()
+		if r != nil {
+			logrus.Errorln("ParseFlag err:", r)
+		}
+	}()
+
 	var opt Option
 	_, err := flags.Parse(&opt)
 	if err != nil {
 		fmt.Println("err:", err)
 	}
 
-	genConfig := new(config.GenConfig)
-	genConfig.SrvName = opt.SrvName
-	genConfig.SavePath = opt.SavePath
-	genConfig.Debug = opt.Debug
-	genConfig.GoPackage = opt.GoPackage
-	genConfig.Package = opt.Package
+	globalConfig.Debug = opt.Debug
+	globalConfig.Services = make(map[string]*config.ServiceConfig)
 
-	genConfig.SqlConfigs = make([]*config.SqlConfig, len(opt.DSN))
+	for _, item := range opt.DSN {
+		c := parseTableConfig(item)
+		srvName := opt.SrvName
 
-	for i, item := range opt.DSN {
-		genConfig.SqlConfigs[i] = parseTableConfig(item)
+		if "" != c.SrvName {
+			srvName = c.SrvName
+		}
+
+		if _, ok := globalConfig.Services[srvName]; ok {
+			globalConfig.Services[srvName].SqlConfigs[c.TableName] = c
+		} else {
+			globalConfig.Services[srvName] = new(config.ServiceConfig)
+			globalConfig.Services[srvName].SrvName = srvName
+			globalConfig.Services[srvName].SavePath = opt.SavePath
+			//globalConfig.Services[srvName].GoPackage = opt.GoPackage
+			//globalConfig.Services[srvName].Package = opt.Package
+			globalConfig.Services[srvName].SqlConfigs = map[string]*config.SqlConfig{c.TableName: c}
+		}
 	}
 
-	return genConfig
+	return globalConfig
 }
