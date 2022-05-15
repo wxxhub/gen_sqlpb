@@ -12,7 +12,7 @@ service {{.Srv}} {
     rpc Del{{$table.UpperName}}(Del{{$table.UpperName}}Req) returns (Del{{$table.UpperName}}Resp);
     rpc Get{{$table.UpperName}}ById(Get{{$table.UpperName}}ByIdReq) returns (Get{{$table.UpperName}}ByIdResp);
     rpc Search{{$table.UpperName}}(Search{{$table.UpperName}}Req) returns (Search{{$table.UpperName}}Resp);
-    {{end}}
+    {{- end}}
 }
 
 {{range $table := .Tables}}
