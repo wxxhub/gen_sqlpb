@@ -21,5 +21,5 @@ go install github.com/wxxhub/gen_sqlpb@latest
 
 ## use
 ```shell
-gen_sqlpb --srvName ServiceName --dsn "[username]:[password]@tcp([ip:port])/[database]?tableName=[tablename]" 
+gen_sqlpb --srvName ServiceName --dsn "username:password@tcp(ip:port)/database?tableName=tablename" 
 ```
