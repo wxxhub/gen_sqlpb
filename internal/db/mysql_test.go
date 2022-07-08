@@ -22,9 +22,9 @@ func TestDbInfo(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println("schema:", schema)
-
+	tableName := "new_table"
 	//var desc xstring
-	rows, err := db.Query("SHOW FULL COLUMNS FROM new_table")
+	rows, err := db.Query(fmt.Sprintf("SHOW FULL COLUMNS FROM %s", tableName))
 
 	if err != nil {
 		panic(err)

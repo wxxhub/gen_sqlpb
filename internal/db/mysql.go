@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 )
@@ -19,7 +20,7 @@ func GenerateMysqlSchema(dsn, table string) ([]*Columns, error) {
 		return cols, nil
 	}
 
-	rows, err := db.Query("SHOW FULL COLUMNS FROM new_table")
+	rows, err := db.Query(fmt.Sprintf("SHOW FULL COLUMNS FROM %s", table))
 
 	if err != nil {
 		return nil, err
