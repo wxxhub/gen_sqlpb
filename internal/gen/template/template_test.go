@@ -1,4 +1,4 @@
-package test
+package template
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 	_ "embed"
 )
 
-//go:embed ../internal/gen/template/proto.tpl
+//go:embed proto.tpl
 var protoTpl string
 
 func TestTemplate(t *testing.T) {

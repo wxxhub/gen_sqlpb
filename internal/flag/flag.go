@@ -10,7 +10,7 @@ import (
 
 type Option struct {
 	SrvName   string   `long:"srvName" description:"service name"`
-	SavePath  string   `long:"savePath" description:"protobuf save path"`
+	SavePath  string   `long:"savePath" description:"protobuf save path" default:"./"`
 	DSN       []string `long:"dsn" description:"data source name"`
 	Debug     bool     `long:"debug" description:"print debug info"`
 	Package   string   `long:"package" description:"protobuf package"`
@@ -18,9 +18,9 @@ type Option struct {
 	FileName  string   `long:"fileName" description:"protobuf file name"`
 }
 
-func parseTableConfig(dsn string) *config.SqlConfig {
+func parseTableConfig(dsn string) *config.DbConfig {
 	a := strings.Split(dsn, "?")
-	sqlDsn := a[0]
+	dsnN := a[0]
 	paramMap := make(map[string]string)
 	if len(a) > 1 {
 		paramsStr := a[1]
@@ -31,25 +31,23 @@ func parseTableConfig(dsn string) *config.SqlConfig {
 		}
 	}
 
-	//params := ""
-	//for key, value := range paramMap {
-	//	switch key {
-	//	case "tableName":
-	//		params = fmt.Sprintf("%s?%s=%s", params, key, value)
-	//	}
-	//}
-	//if len(params) > 0 {
-	//	sqlDsn = fmt.Sprintf("%s?%s", sqlDsn, params)
-	//}
 	tableName := paramMap["tableName"]
 
-	c := &config.SqlConfig{
-		SqlDsn:    sqlDsn,
+	c := &config.DbConfig{
+		Dsn:       dsnN,
 		TableName: tableName,
 	}
 
 	if srvName, ok := paramMap["srvName"]; ok {
 		c.SrvName = srvName
+	}
+
+	// database
+	dsnNSplit := strings.Split(dsnN, "/")
+	if len(dsnNSplit) == 2 {
+		c.DataBase = dsnNSplit[1]
+	} else {
+		logrus.Panicln("dsn need database")
 	}
 
 	return c
@@ -74,22 +72,33 @@ func ParseFlag() (globalConfig *config.GlobalConfig) {
 	globalConfig.Services = make(map[string]*config.ServiceConfig)
 
 	for _, item := range opt.DSN {
-		c := parseTableConfig(item)
-		srvName := opt.SrvName
-
-		if "" != c.SrvName {
-			srvName = c.SrvName
+		dbConfig := parseTableConfig(item)
+		if "" == dbConfig.SrvName {
+			dbConfig.SrvName = dbConfig.TableName
 		}
 
-		if _, ok := globalConfig.Services[srvName]; ok {
-			globalConfig.Services[srvName].SqlConfigs[c.TableName] = c
-		} else {
-			globalConfig.Services[srvName] = new(config.ServiceConfig)
-			globalConfig.Services[srvName].SrvName = srvName
-			globalConfig.Services[srvName].SavePath = opt.SavePath
-			//globalConfig.Services[srvName].GoPackage = opt.GoPackage
-			//globalConfig.Services[srvName].Package = opt.Package
-			globalConfig.Services[srvName].SqlConfigs = map[string]*config.SqlConfig{c.TableName: c}
+		srvName := dbConfig.SrvName
+
+		globalConfig.Services[srvName] = new(config.ServiceConfig)
+		globalConfig.Services[srvName].SrvName = srvName
+		globalConfig.Services[srvName].SavePath = opt.SavePath
+		globalConfig.Services[srvName].StructSavePath = opt.SavePath
+		globalConfig.Services[srvName].SqlSavePath = opt.SavePath
+		//globalConfig.Services[srvName].GoPackage = opt.GoPackage
+		//globalConfig.Services[srvName].Package = opt.Package
+		globalConfig.Services[srvName].DbConfig = dbConfig
+		globalConfig.Services[srvName].SrvName = dbConfig.SrvName
+
+		if len(globalConfig.Services[srvName].SavePath) == 0 {
+			globalConfig.Services[srvName].SavePath = "./proto"
+		}
+
+		if len(globalConfig.Services[srvName].StructSavePath) == 0 {
+			globalConfig.Services[srvName].StructSavePath = "./struct"
+		}
+
+		if len(globalConfig.Services[srvName].SqlSavePath) == 0 {
+			globalConfig.Services[srvName].SqlSavePath = "./sql"
 		}
 	}
 

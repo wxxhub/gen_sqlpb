@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/wxxhub/gen_sqlpb/internal/common"
 	"testing"
 )
 
@@ -33,7 +34,7 @@ func TestDbInfo(t *testing.T) {
 
 	//desc := make(map[xstring]xstring)
 	for rows.Next() {
-		c := new(Columns)
+		c := new(common.Column)
 		fmt.Println(rows.Columns())
 		rows.Scan(&c.Field, &c.Type, &c.Collation, &c.Null, &c.Key, &c.Default, &c.Extra, &c.Privileges, &c.Comment)
 		fmt.Println("c:", c)

@@ -3,21 +3,10 @@ package db
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"github.com/wxxhub/gen_sqlpb/internal/common"
 )
 
-type Columns struct {
-	Field      string
-	Type       string
-	Collation  string
-	Null       string
-	Key        string
-	Default    string
-	Extra      string
-	Privileges string
-	Comment    string
-}
-
-func GenerateSchema(driverName, dsn, tableName string) ([]*Columns, error) {
+func GenerateSchema(driverName, dsn, dataBaseName, tableName string) (*common.TableInfo, error) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -26,8 +15,8 @@ func GenerateSchema(driverName, dsn, tableName string) ([]*Columns, error) {
 	}()
 
 	switch driverName {
-	case "mysql":
-		return GenerateMysqlSchema(dsn, tableName)
+	case "mysql", "mariadb":
+		return GenerateMysqlSchema(dsn, dataBaseName, tableName)
 	}
 
 	return nil, fmt.Errorf("implement %s", driverName)

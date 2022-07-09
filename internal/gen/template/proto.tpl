@@ -5,61 +5,58 @@ option go_package ="{{.GoPackage}}";
 package {{.Package}};
 
 service {{.Srv}} {
-    {{range $table := .Tables}}
-    //-----------------------{{$table.UpperName}}-----------------------
-    rpc Add{{$table.UpperName}}(Add{{$table.UpperName}}Req) returns (Add{{$table.UpperName}}Resp);
-    rpc Update{{$table.UpperName}}(Update{{$table.UpperName}}Req) returns (Update{{$table.UpperName}}Resp);
-    rpc Del{{$table.UpperName}}(Del{{$table.UpperName}}Req) returns (Del{{$table.UpperName}}Resp);
-    rpc Get{{$table.UpperName}}ById(Get{{$table.UpperName}}ByIdReq) returns (Get{{$table.UpperName}}ByIdResp);
-    rpc Search{{$table.UpperName}}(Search{{$table.UpperName}}Req) returns (Search{{$table.UpperName}}Resp);
-    {{- end}}
+    //-----------------------{.TableInfo.UpperName}}-----------------------
+    rpc Add{{.TableInfo.UpperName}}(Add{{.TableInfo.UpperName}}Req) returns (Add{{.TableInfo.UpperName}}Resp);
+    rpc Update{{.TableInfo.UpperName}}(Update{{.TableInfo.UpperName}}Req) returns (Update{{.TableInfo.UpperName}}Resp);
+    rpc Del{{.TableInfo.UpperName}}(Del{{.TableInfo.UpperName}}Req) returns (Del{{.TableInfo.UpperName}}Resp);
+    rpc Get{{.TableInfo.UpperName}}ById(Get{{.TableInfo.UpperName}}ByIdReq) returns (Get{{.TableInfo.UpperName}}ByIdResp);
+    rpc Search{{.TableInfo.UpperName}}(Search{{.TableInfo.UpperName}}Req) returns (Search{{.TableInfo.UpperName}}Resp);
 }
 
-{{range $table := .Tables}}
-//--------------------------------{{$table.UpperName}}--------------------------------
-message {{$table.UpperName}} {
-  int64 id = 1; //id
-  string name = 2; //name
+//--------------------------------{{.TableInfo.UpperName}}--------------------------------
+message {{.TableInfo.UpperName}} {
+{{range $item := .ProtoItems}}
+  {{$item.Type}} {{$item.Name}} = {{$item.Index}};
+{{- end}}
 }
 
-message Add{{$table.UpperName}}Req {
-  string name = 1; //name
+message Add{{.TableInfo.UpperName}}Req {
+{{.TableInfo.UpperName}} {{.TableInfo.Name}} = 1;
 }
 
-message Add{{$table.UpperName}}Resp {
+message Add{{.TableInfo.UpperName}}Resp {
+{{.TableInfo.UpperName}} {{.TableInfo.Name}} = 1;
 }
 
-message Update{{$table.UpperName}}Req {
-  int64 id = 1; //id
-  string name = 2; //name
+message Update{{.TableInfo.UpperName}}Req {
+  {{.TableInfo.UpperName}} {{.TableInfo.Name}} = 1;
 }
 
-message Update{{$table.UpperName}}Resp {
+message Update{{.TableInfo.UpperName}}Resp {
 }
 
-message Del{{$table.UpperName}}Req {
+message Del{{.TableInfo.UpperName}}Req {
   int64 id = 1; //id
 }
 
-message Del{{$table.UpperName}}Resp {
+message Del{{.TableInfo.UpperName}}Resp {
 }
 
-message Get{{$table.UpperName}}ByIdReq {
+message Get{{.TableInfo.UpperName}}ByIdReq {
   int64 id = 1; //id
 }
 
-message Get{{$table.UpperName}}ByIdResp {
-  {{$table.UpperName}} {{$table.Name}} = 1; //{{$table.UpperName}}
+message Get{{.TableInfo.UpperName}}ByIdResp {
+  {{.TableInfo.UpperName}} {{.TableInfo.Name}} = 1; //{{.TableInfo.UpperName}}
 }
 
-message Search{{$table.UpperName}}Req {
+message Search{{.TableInfo.UpperName}}Req {
   int64 page = 1;       //page
   int64 pageSize = 2;   //pageSize
   int64 id = 3;         //id
   string name = 4;      //name
 }
 
-message Search{{$table.UpperName}}Resp {
-  repeated {{$table.UpperName}} {{$table.Name}} = 1; //{{$table.UpperName}}
+message Search{{.TableInfo.UpperName}}Resp {
+  repeated {{.TableInfo.UpperName}} {{.TableInfo.Name}} = 1; //{{.TableInfo.UpperName}}
 }
-{{end}}

@@ -1,18 +1,23 @@
 package config
 
-type SqlConfig struct {
-	SqlDsn    string
+type DbConfig struct {
+	Dsn       string
+	DataBase  string
 	TableName string
 	SrvName   string
 }
 
 type ServiceConfig struct {
-	SqlConfigs map[string]*SqlConfig
-	SrvName    string
-	SavePath   string
-	FileName   string
-	Package    string
-	GoPackage  string
+	DbConfig       *DbConfig
+	SrvName        string
+	SavePath       string
+	FileName       string
+	SqlSavePath    string
+	SqlFileName    string
+	StructSavePath string
+	StructFileName string
+	Package        string
+	GoPackage      string
 }
 
 type GlobalConfig struct {
