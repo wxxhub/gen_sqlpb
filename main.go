@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
+	"github.com/wxxhub/gen_sqlpb/internal/common"
 	"github.com/wxxhub/gen_sqlpb/internal/db"
 	"github.com/wxxhub/gen_sqlpb/internal/flag"
 	"github.com/wxxhub/gen_sqlpb/internal/gen"
+	"github.com/wxxhub/gen_sqlpb/internal/xstring"
 	"os"
 
 	"strings"
@@ -17,18 +19,22 @@ func main() {
 			logrus.Errorln(r)
 		}
 	}()
-	serviceConfig := flag.ParseFlag()
+	gloabalConfig := flag.ParseFlag()
 	// set log level
-	if serviceConfig.Debug {
+	if gloabalConfig.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 
-	logrus.Debugln("serviceConfig: ", serviceConfig)
+	logrus.Debugln("gloabalConfig: ", gloabalConfig)
 
+	if !gloabalConfig.Option.NotUseDefaultTemple {
+		gloabalConfig.Option.Temples = append(gloabalConfig.Option.Temples, common.DefaultProtoFileName)
+		gloabalConfig.Option.Temples = append(gloabalConfig.Option.Temples, common.DefaultStructFileName)
+	}
 	// get data struct
-	for _, srvConfig := range serviceConfig.Services {
+	for _, srvConfig := range gloabalConfig.Services {
 		// config
 		if len(srvConfig.Package) == 0 {
 			srvConfig.Package = strings.ToLower(srvConfig.SrvName)
@@ -73,6 +79,12 @@ func main() {
 		if err != nil {
 			logrus.Panicf("GenerateSchema faile: %s", err.Error())
 		}
-		gen.GenProto(srvConfig, tableInfo)
+
+		tableInfo.UpperName = strings.ToUpper(tableInfo.Name)
+		tableInfo.CamelName = xstring.ToCamelWithStartUpper(tableInfo.Name)
+		tableInfo.FName = strings.ToLower(string(tableInfo.Name[0]))
+
+		gen.GenTemples(srvConfig, tableInfo, gloabalConfig.Option.Temples)
+		//gen.GenProto(srvConfig, tableInfo)
 	}
 }

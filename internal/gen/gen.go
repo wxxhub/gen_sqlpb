@@ -3,8 +3,6 @@ package gen
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/wxxhub/gen_sqlpb/internal/common"
-	"github.com/wxxhub/gen_sqlpb/internal/config"
-	"github.com/wxxhub/gen_sqlpb/internal/xstring"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -20,15 +18,34 @@ var protoTpl string
 //go:embed template/struct.tpl
 var structTpl string
 
-func GenProto(serviceConfig *config.ServiceConfig, tableInfo *common.TableInfo) {
+func GenTemples(serviceConfig *common.ServiceConfig, tableInfo *common.TableInfo, tplFiles []string) {
+	for _, tplFile := range tplFiles {
+		switch tplFile {
+		case common.DefaultProtoFileName:
+			fullPath := filepath.Join(serviceConfig.SavePath, serviceConfig.FileName)
+			GenTemple(serviceConfig, tableInfo, protoTpl, fullPath)
+		case common.DefaultStructFileName:
+			fullPath := filepath.Join(serviceConfig.SavePath, serviceConfig.StructFileName)
+			GenTemple(serviceConfig, tableInfo, structTpl, fullPath)
+		default:
+			GenTempleFromFile(serviceConfig, tableInfo, tplFile, "")
+		}
+	}
+
+	// sql
+	sqlFullPath := filepath.Join(serviceConfig.SqlSavePath, serviceConfig.SqlFileName)
+	ioutil.WriteFile(sqlFullPath, []byte(tableInfo.CreateTable), os.ModePerm)
+}
+
+func GenTempleFromFile(serviceConfig *common.ServiceConfig, tableInfo *common.TableInfo, tplFile string, saveFile string) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			logrus.Errorln("GenProto err:", r)
+			logrus.Errorln("GenTemple err:", r)
 		}
 	}()
 
-	tableInfo.UpperName = xstring.ToCamelWithStartUpper(tableInfo.Name)
+	tpl, err := ioutil.ReadFile(tplFile)
 
 	content := &common.Content{
 		Srv:       serviceConfig.SrvName,
@@ -41,15 +58,14 @@ func GenProto(serviceConfig *config.ServiceConfig, tableInfo *common.TableInfo) 
 	content.GoStructItems = genGoSturctContent(tableInfo)
 
 	// proto
-	tmpl, err := template.New("gen_proto").Parse(protoTpl)
+	tmpl, err := template.New("gen_temple").Parse(string(tpl))
 	if err != nil {
 		logrus.Panicf("Parse proto template faile: %s", err.Error())
 	}
 
-	fullPath := filepath.Join(serviceConfig.SavePath, serviceConfig.FileName)
-	f, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	f, err := os.OpenFile(saveFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
-		logrus.Panicf("OpenFile %s faile: %s", fullPath, err.Error())
+		logrus.Panicf("OpenFile %s faile: %s", saveFile, err.Error())
 	}
 	defer f.Close()
 
@@ -57,28 +73,41 @@ func GenProto(serviceConfig *config.ServiceConfig, tableInfo *common.TableInfo) 
 	if err != nil {
 		logrus.Panicf("Execute template faile:%s", err.Error())
 	}
+}
 
-	// go struct
-	tmplStruct, err := template.New("gen_struct").Parse(structTpl)
+func GenTemple(serviceConfig *common.ServiceConfig, tableInfo *common.TableInfo, tpl string, saveFile string) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			logrus.Errorln("GenTemple err:", r)
+		}
+	}()
+
+	content := &common.Content{
+		Srv:       serviceConfig.SrvName,
+		TableInfo: tableInfo,
+		Package:   serviceConfig.Package,
+		GoPackage: serviceConfig.GoPackage,
+	}
+
+	content.ProtoItems = genTableProtoContent(tableInfo)
+	content.GoStructItems = genGoSturctContent(tableInfo)
+
+	tmpl, err := template.New("gen_temple").Parse(tpl)
 	if err != nil {
 		logrus.Panicf("Parse proto template faile: %s", err.Error())
 	}
 
-	fullPath = filepath.Join(serviceConfig.StructSavePath, serviceConfig.StructFileName)
-	structF, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	f, err := os.OpenFile(saveFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
-		logrus.Panicf("Open Struct File %s faile: %s", fullPath, err.Error())
+		logrus.Panicf("OpenFile %s faile: %s", saveFile, err.Error())
 	}
-	defer structF.Close()
+	defer f.Close()
 
-	err = tmplStruct.Execute(structF, content)
+	err = tmpl.Execute(f, content)
 	if err != nil {
 		logrus.Panicf("Execute template faile:%s", err.Error())
 	}
-
-	// sql
-	fullPath = filepath.Join(serviceConfig.SqlSavePath, serviceConfig.SqlFileName)
-	ioutil.WriteFile(fullPath, []byte(tableInfo.CreateTable), os.ModePerm)
 }
 
 func genTableProtoContent(tableInfo *common.TableInfo) []*common.ProtoItem {

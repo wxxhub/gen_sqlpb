@@ -4,21 +4,11 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/sirupsen/logrus"
-	"github.com/wxxhub/gen_sqlpb/internal/config"
+	"github.com/wxxhub/gen_sqlpb/internal/common"
 	"strings"
 )
 
-type Option struct {
-	SrvName   string   `long:"srvName" description:"service name"`
-	SavePath  string   `long:"savePath" description:"protobuf save path" default:"./"`
-	DSN       []string `long:"dsn" description:"data source name"`
-	Debug     bool     `long:"debug" description:"print debug info"`
-	Package   string   `long:"package" description:"protobuf package"`
-	GoPackage string   `long:"goPackage" description:"golang package"`
-	FileName  string   `long:"fileName" description:"protobuf file name"`
-}
-
-func parseTableConfig(dsn string) *config.DbConfig {
+func parseTableConfig(dsn string) *common.DbConfig {
 	a := strings.Split(dsn, "?")
 	dsnN := a[0]
 	paramMap := make(map[string]string)
@@ -33,7 +23,7 @@ func parseTableConfig(dsn string) *config.DbConfig {
 
 	tableName := paramMap["tableName"]
 
-	c := &config.DbConfig{
+	c := &common.DbConfig{
 		Dsn:       dsnN,
 		TableName: tableName,
 	}
@@ -53,8 +43,8 @@ func parseTableConfig(dsn string) *config.DbConfig {
 	return c
 }
 
-func ParseFlag() (globalConfig *config.GlobalConfig) {
-	globalConfig = new(config.GlobalConfig)
+func ParseFlag() (globalConfig *common.GlobalConfig) {
+	globalConfig = new(common.GlobalConfig)
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -62,14 +52,14 @@ func ParseFlag() (globalConfig *config.GlobalConfig) {
 		}
 	}()
 
-	var opt Option
+	var opt common.Option
 	_, err := flags.Parse(&opt)
 	if err != nil {
 		fmt.Println("err:", err)
 	}
 
 	globalConfig.Debug = opt.Debug
-	globalConfig.Services = make(map[string]*config.ServiceConfig)
+	globalConfig.Services = make(map[string]*common.ServiceConfig)
 
 	for _, item := range opt.DSN {
 		dbConfig := parseTableConfig(item)
@@ -79,7 +69,7 @@ func ParseFlag() (globalConfig *config.GlobalConfig) {
 
 		srvName := dbConfig.SrvName
 
-		globalConfig.Services[srvName] = new(config.ServiceConfig)
+		globalConfig.Services[srvName] = new(common.ServiceConfig)
 		globalConfig.Services[srvName].SrvName = srvName
 		globalConfig.Services[srvName].SavePath = opt.SavePath
 		globalConfig.Services[srvName].StructSavePath = opt.SavePath
