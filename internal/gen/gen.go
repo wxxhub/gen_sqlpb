@@ -159,6 +159,7 @@ func genGoSturctContent(tableInfo *common.TableInfo) []*common.GoStructItem {
 		m[index] = &common.GoStructItem{
 			Name:      item.Field,
 			NameUpper: strings.ToUpper(item.Field),
+			Column:    item,
 		}
 
 		itemType := strings.Split(item.Type, "(")[0]

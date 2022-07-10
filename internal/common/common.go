@@ -74,6 +74,7 @@ type GoStructItem struct {
 	Type      string
 	Name      string
 	NameUpper string
+	Column    *Column
 }
 
 type Table struct {

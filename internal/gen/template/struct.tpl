@@ -2,7 +2,7 @@ package {{.TableInfo.Name}}
 
 type {{.TableInfo.CamelName}} struct {
 {{- range $item := .GoStructItems}}
-    {{$item.Name}} {{$item.Type}} `gorm:"{{$item.Name}}" json:"{{$item.Name}}"`
+    {{$item.Name}} {{$item.Type}} `gorm:"column:ORDEREXECUTED;type:{{$item.Column.Type}}" json:"{{$item.Name}}" `
 {{- end}}
 }
 
