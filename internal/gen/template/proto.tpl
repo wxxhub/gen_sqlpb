@@ -15,7 +15,7 @@ service {{.Srv}} {
 
 //--------------------------------{{.TableInfo.CamelName}}--------------------------------
 message {{.TableInfo.CamelName}} {
-{{- range $item := .ProtoItems}}
+{{- range $item := .ProtoContent.ProtoItems}}
   {{$item.Type}} {{$item.Name}} = {{$item.Index}};
 {{- end}}
 }
@@ -37,17 +37,17 @@ message Update{{.TableInfo.CamelName}}Resp {
 }
 
 message Del{{.TableInfo.CamelName}}Req {
-  int64 id = 1; //id
+  {{.ProtoContent.PrimaryIndexItem.GenItem.Type}} {{.ProtoContent.PrimaryIndexItem.GenItem.Name}} = 1; // {{.ProtoContent.PrimaryIndexItem.GenItem.Name}}
 }
 
 message Del{{.TableInfo.CamelName}}Resp {
 }
 
-message Get{{.TableInfo.CamelName}}ByIdReq {
-  int64 id = 1; //id
+message Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Req {
+  {{.ProtoContent.PrimaryIndexItem.GenItem.Type}} {{.ProtoContent.PrimaryIndexItem.GenItem.Name}} = 1; // {{.ProtoContent.PrimaryIndexItem.GenItem.Name}}
 }
 
-message Get{{.TableInfo.CamelName}}ByIdResp {
+message Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Resp {
   {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1; //{{.TableInfo.CamelName}}
 }
 

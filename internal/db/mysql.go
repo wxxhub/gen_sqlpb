@@ -17,7 +17,6 @@ func GenerateMysqlSchema(dsn, database, table string) (*common.TableInfo, error)
 	tableInfo := new(common.TableInfo)
 	tableInfo.Name = table
 	tableInfo.UpperName = strings.ToUpper(table)
-
 	tableInfo.Columns = make([]*common.Column, 0)
 
 	if len(table) == 0 {
@@ -45,10 +44,41 @@ func GenerateMysqlSchema(dsn, database, table string) (*common.TableInfo, error)
 	if err != nil {
 		return nil, err
 	}
+	defer queryCreateTableRow.Close()
 
 	tempTable := ""
 	for queryCreateTableRow.Next() {
 		queryCreateTableRow.Scan(&tempTable, &tableInfo.CreateTable)
+	}
+
+	// query Index
+	queryIndexTableRow, err := db.Query("SHOW INDEX FROM " + table)
+	if err != nil {
+		return nil, err
+	}
+
+	tableInfo.SqlIndexes = make([]*common.SqlIndex, 0)
+	defer queryIndexTableRow.Close()
+	for queryIndexTableRow.Next() {
+		sqlIndex := new(common.SqlIndex)
+		queryIndexTableRow.Scan(&sqlIndex.TableName,
+			&sqlIndex.NonUnique,
+			&sqlIndex.KeyName,
+			&sqlIndex.SeqInIndex,
+			&sqlIndex.ColumnName,
+			&sqlIndex.Collation,
+			&sqlIndex.Cardinality,
+			&sqlIndex.SubPart,
+			&sqlIndex.Packed,
+			&sqlIndex.Null,
+			&sqlIndex.IndexType,
+			&sqlIndex.Comment,
+			&sqlIndex.IndexComment)
+		if "PRIMARY" == sqlIndex.KeyName {
+			tableInfo.PrimaryIndex = sqlIndex
+		} else {
+			tableInfo.SqlIndexes = append(tableInfo.SqlIndexes, sqlIndex)
+		}
 	}
 
 	return tableInfo, nil

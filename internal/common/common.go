@@ -46,47 +46,79 @@ type Column struct {
 	Type       string
 	Collation  string
 	Null       string
-	Key        string
+	Key        string // example: PRI 主键
 	Default    string
 	Extra      string
 	Privileges string
 	Comment    string
 }
 
+type SqlIndex struct {
+	TableName    string
+	NonUnique    int
+	KeyName      string
+	SeqInIndex   int
+	ColumnName   string
+	Collation    string
+	Cardinality  string
+	SubPart      string
+	Packed       string
+	Null         string
+	IndexType    string
+	Comment      string
+	IndexComment string
+}
+
 type TableInfo struct {
-	Name        string
-	FName       string
-	UpperName   string
-	CamelName   string
-	Columns     []*Column
-	CreateTable string
+	Name         string
+	FName        string
+	UpperName    string
+	CamelName    string
+	Columns      []*Column
+	CreateTable  string
+	PrimaryIndex *SqlIndex
+	SqlIndexes   []*SqlIndex
 }
 
 // gen
-type ProtoItem struct {
+type GenItem struct {
 	Type      string
 	Name      string
 	NameUpper string
-	Index     int
+	CamelName string
+}
+
+type ProtoItem struct {
+	GenItem
+	Index int
+}
+
+type ProtoContent struct {
+	ProtoItems       []*ProtoItem
+	PrimaryIndexItem *ProtoItem
+	IndexItem        []*ProtoItem
 }
 
 type GoStructItem struct {
-	Type      string
-	Name      string
-	NameUpper string
-	Column    *Column
+	GenItem
+	Column *Column
 }
 
-type Table struct {
-	Name      string
-	UpperName string
+type GoStructContent struct {
+	GoStructItems []*GoStructItem
+}
+
+type PrimaryIndexItem struct {
+	ProtoItem    *ProtoItem
+	GoStructItem *GoStructItem
 }
 
 type Content struct {
-	Srv           string
-	TableInfo     *TableInfo
-	ProtoItems    []*ProtoItem
-	GoStructItems []*GoStructItem
-	Package       string
-	GoPackage     string
+	Srv              string
+	TableInfo        *TableInfo
+	ProtoContent     *ProtoContent
+	GoStructContent  *GoStructContent
+	Package          string
+	GoPackage        string
+	PrimaryIndexItem *PrimaryIndexItem
 }
