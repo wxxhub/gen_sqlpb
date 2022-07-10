@@ -15,17 +15,17 @@ service {{.Srv}} {
 
 //--------------------------------{{.TableInfo.CamelName}}--------------------------------
 message {{.TableInfo.CamelName}} {
-{{range $item := .ProtoItems}}
+{{- range $item := .ProtoItems}}
   {{$item.Type}} {{$item.Name}} = {{$item.Index}};
 {{- end}}
 }
 
 message Add{{.TableInfo.CamelName}}Req {
-{{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
 }
 
 message Add{{.TableInfo.CamelName}}Resp {
-{{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
 }
 
 message Update{{.TableInfo.CamelName}}Req {
@@ -33,6 +33,7 @@ message Update{{.TableInfo.CamelName}}Req {
 }
 
 message Update{{.TableInfo.CamelName}}Resp {
+  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
 }
 
 message Del{{.TableInfo.CamelName}}Req {
