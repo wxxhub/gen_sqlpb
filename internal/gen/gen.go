@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	_ "embed"
@@ -121,7 +122,7 @@ func genTemple(serviceConfig *common.ServiceConfig, tableInfo *common.TableInfo,
 	defer func() {
 		r := recover()
 		if r != nil {
-			logrus.Errorln("genTemple err:", r)
+			logrus.Errorln("genTemple err:", r, " ", string(debug.Stack()))
 		}
 	}()
 
