@@ -106,7 +106,7 @@ func genTempleFromFile(serviceConfig *common.ServiceConfig, tableInfo *common.Ta
 	defer func() {
 		r := recover()
 		if r != nil {
-			logrus.Errorln("genTemple err:", r)
+			logrus.Errorf("genTemple err: %+v\n%s", r, string(debug.Stack()))
 		}
 	}()
 
@@ -122,7 +122,7 @@ func genTemple(serviceConfig *common.ServiceConfig, tableInfo *common.TableInfo,
 	defer func() {
 		r := recover()
 		if r != nil {
-			logrus.Errorln("genTemple err:", r, " ", string(debug.Stack()))
+			logrus.Errorf("genTemple err: %+v\n%s", r, string(debug.Stack()))
 		}
 	}()
 
