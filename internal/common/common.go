@@ -67,6 +67,8 @@ type SqlIndex struct {
 	IndexType    string
 	Comment      string
 	IndexComment string
+	Expression   string
+	Visible      string
 }
 
 type TableInfo struct {

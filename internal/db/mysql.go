@@ -73,7 +73,9 @@ func GenerateMysqlSchema(dsn, database, table string) (*common.TableInfo, error)
 			&sqlIndex.Null,
 			&sqlIndex.IndexType,
 			&sqlIndex.Comment,
-			&sqlIndex.IndexComment)
+			&sqlIndex.IndexComment,
+			&sqlIndex.Expression,
+			&sqlIndex.Visible)
 		if "PRIMARY" == sqlIndex.KeyName {
 			tableInfo.PrimaryIndex = sqlIndex
 		} else {
