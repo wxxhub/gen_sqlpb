@@ -1,11 +1,11 @@
 package {{.TableInfo.Name}}
 
-type {{.TableInfo.CamelName}} struct {
+type {{.TableInfo.Name|StringCamel}} struct {
 {{- range $item := .GoStructContent.GoStructItems}}
-    {{$item.CamelName}} {{$item.Type}} `gorm:"type:{{$item.Column.Type}}" json:"{{$item.Name}}" `
+    {{$item.Name|StringCamel}} {{$item.Type}} `gorm:"type:{{$item.Column.Type}}" json:"{{$item.Name}}"` {{$item.Comment|AddNote}}
 {{- end}}
 }
 
-func ({{.TableInfo.FName}} *{{.TableInfo.CamelName}}) TableName() string {
+func ({{.TableInfo.Name|StringLowFirst}} *{{.TableInfo.Name|StringCamel}}) TableName() string {
     return "{{.TableInfo.Name}}"
 }

@@ -53,17 +53,23 @@ type Column struct {
 	Comment    string
 }
 
+type IndexType int
+
+const (
+	IndexKey IndexType = iota
+	PrimaryIndexKey
+	UniqueIndexKey
+)
+
 type SqlIndex struct {
-	TableName    string
-	NonUnique    int
-	KeyName      string
-	SeqInIndex   int
-	ColumnName   string
-	Collation    string
-	Cardinality  string
-	SubPart      string
-	Packed       string
-	Null         string
+	Type        IndexType
+	KeyName     string
+	Unique      bool
+	SeqInIndex  int
+	ColumnName  []string
+	Collation   string
+	Cardinality string
+	//Null         string
 	IndexType    string
 	Comment      string
 	IndexComment string
@@ -73,9 +79,6 @@ type SqlIndex struct {
 
 type TableInfo struct {
 	Name         string
-	FName        string
-	UpperName    string
-	CamelName    string
 	Columns      []*Column
 	CreateTable  string
 	PrimaryIndex *SqlIndex
@@ -84,21 +87,25 @@ type TableInfo struct {
 
 // gen
 type GenItem struct {
-	Type      string
-	Name      string
-	NameUpper string
-	CamelName string
+	Type    string
+	Name    string
+	Comment string
 }
 
 type ProtoItem struct {
 	GenItem
-	Index int
+}
+
+type ProtoIndexItem struct {
+	GenItem
+	Fields     []string
+	IndexItems []*ProtoItem
 }
 
 type ProtoContent struct {
 	ProtoItems       []*ProtoItem
-	PrimaryIndexItem *ProtoItem
-	IndexItem        []*ProtoItem
+	PrimaryIndexItem *ProtoIndexItem
+	IndexItem        []*ProtoIndexItem
 }
 
 type GoStructItem struct {
@@ -124,3 +131,5 @@ type Content struct {
 	GoPackage        string
 	PrimaryIndexItem *PrimaryIndexItem
 }
+
+// regex

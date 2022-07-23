@@ -42,3 +42,31 @@ func TestDbInfo(t *testing.T) {
 		fmt.Println("desc: ", *c)
 	}
 }
+
+func TestParsePrimaryKey(t *testing.T) {
+	line := "PRIMARY KEY (`id`)"
+	index := parseCreateTableIndexField(line)
+	fmt.Printf("%+v\n", index)
+	fmt.Println("==============")
+
+	line = "PRIMARY KEY (`id`,`keyword`)"
+	index = parseCreateTableIndexField(line)
+	fmt.Printf("%+v\n", index)
+	fmt.Println("==============")
+
+	line = "UNIQUE KEY `catename` (`catid`)  "
+	index = parseCreateTableIndexField(line)
+	fmt.Printf("%+v\n", index)
+	fmt.Println("==============")
+
+	line = "KEY `idx_id_name` (`id`, `name`)  "
+	index = parseCreateTableIndexField(line)
+	fmt.Printf("%+v\n", index)
+	fmt.Println("==============")
+}
+
+func TestParseField(t *testing.T) {
+	line := "`id` bigint(20) NOT NULL DEFAULT '123' AUTO_INCREMENT comment 'test comment',"
+	c := parseCreateTableField(line)
+	fmt.Printf("%+v\n", c)
+}
