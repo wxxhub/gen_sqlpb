@@ -13,15 +13,15 @@ func main() {
 			logrus.Errorln(r)
 		}
 	}()
-	gloabalConfig := flag.ParseFlag()
+	globalConfig := flag.ParseFlag()
 	// set log level
-	if gloabalConfig.Debug {
+	if globalConfig.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 
-	logrus.Debugln("gloabalConfig: ", gloabalConfig)
+	logrus.Debugln("globalConfig: ", globalConfig)
 
-	gen.Gen(gloabalConfig)
+	gen.Gen(globalConfig)
 }

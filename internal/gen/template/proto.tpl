@@ -5,13 +5,16 @@ option go_package ="{{.GoPackage}}";
 package {{.Package}};
 
 service {{.Srv}} {
-    //-----------------------{.TableInfo.CamelName}}-----------------------
-    rpc Add{{.TableInfo.CamelName}}(Add{{.TableInfo.CamelName}}Req) returns (Add{{.TableInfo.CamelName}}Res);
-    rpc Update{{.TableInfo.CamelName}}(Update{{.TableInfo.CamelName}}Req) returns (Update{{.TableInfo.CamelName}}Res);
-    rpc Del{{.TableInfo.CamelName}}(Del{{.TableInfo.CamelName}}Req) returns (Del{{.TableInfo.CamelName}}Res);
-    rpc Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}(Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Req) returns (Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Res);
-    rpc Mget{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}(Mget{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Req) returns (Mget{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Res);
-    rpc Search{{.TableInfo.CamelName}}(Search{{.TableInfo.CamelName}}Req) returns (Search{{.TableInfo.CamelName}}Res);
+    //-----------------------{{.TableInfo.Name|StringCamel}}-----------------------
+    rpc Add{{.TableInfo.Name|StringCamel}}(Add{{.TableInfo.Name|StringCamel}}Req) returns (Add{{.TableInfo.Name|StringCamel}}Res);
+    rpc Update{{.TableInfo.Name|StringCamel}}(Update{{.TableInfo.Name|StringCamel}}Req) returns (Update{{.TableInfo.Name|StringCamel}}Res);
+
+    {{StringJoin "Get" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd)| RpcLine}};
+    {{StringJoin "Update" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd)| RpcLine}};
+    {{StringJoin "Del" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd)| RpcLine}};
+    {{StringJoin "Mget" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd)| RpcLine}};
+
+    rpc Search{{.TableInfo.Name|StringCamel}}(Search{{.TableInfo.Name|StringCamel}}Req) returns (Search{{.TableInfo.Name|StringCamel}}Res);
 }
 
 message ExtraOpt {
@@ -35,66 +38,85 @@ message Condition {
   Where having = 5;
 }
 
-//--------------------------------{{.TableInfo.CamelName}}--------------------------------
-message {{.TableInfo.CamelName}} {
-{{- range $item := .ProtoContent.ProtoItems}}
-  {{$item.Type}} {{$item.Name}} = {{$item.Index}};
+//--------------------------------{{.TableInfo.Name|StringCamel}}--------------------------------
+message {{.TableInfo.Name|StringCamel}} {
+{{- range $index, $item := .ProtoContent.ProtoItems}}
+  {{$item.Type}} {{$item.Name}} = {{$index|ItemIndex}}; {{$item.Comment|AddNote}}
 {{- end}}
 }
 
-message Add{{.TableInfo.CamelName}}Req {
-  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+message Add{{.TableInfo.Name|StringCamel}}Req {
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1;
   ExtraOpt extra_opt = 2;
 }
 
-message Add{{.TableInfo.CamelName}}Res {
-  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+message Add{{.TableInfo.Name|StringCamel}}Res {
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1;
 }
 
-message Update{{.TableInfo.CamelName}}Req {
-  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+message Update{{.TableInfo.Name|StringCamel}}Req {
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1;
   ExtraOpt extra_opt = 2;
 }
 
-message Update{{.TableInfo.CamelName}}Res {
-  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+message Update{{.TableInfo.Name|StringCamel}}Res {
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1;
 }
 
-message Del{{.TableInfo.CamelName}}Req {
-  {{.ProtoContent.PrimaryIndexItem.GenItem.Type}} {{.ProtoContent.PrimaryIndexItem.GenItem.Name}} = 1; // {{.ProtoContent.PrimaryIndexItem.GenItem.Name}}
+{{/*primary index*/}}
+message Key {
+{{- range $index, $item := .ProtoContent.PrimaryIndexItem.IndexItems}}
+  {{$item.Type}} {{$item.Name}} = {{$index|ItemIndex}}; {{$item.Comment|AddNote}}
+{{- end}}
+}
+
+message {{StringJoin "Get" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Req"}} {
+  Key key = 1;
   ExtraOpt extra_opt = 2;
 }
 
-message Del{{.TableInfo.CamelName}}Res {
-}
-
-message Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Req {
-  {{.ProtoContent.PrimaryIndexItem.GenItem.Type}} {{.ProtoContent.PrimaryIndexItem.GenItem.Name}} = 1; // {{.ProtoContent.PrimaryIndexItem.GenItem.Name}}
+message {{StringJoin "Get" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Res"}} {
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1; //{{.TableInfo.Name|StringCamel}}
   ExtraOpt extra_opt = 2;
 }
 
-message Get{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Res {
-  {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1; //{{.TableInfo.CamelName}}
+message {{StringJoin "Update" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Req"}} {
+  Key key = 1;
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 2;
+  ExtraOpt extra_opt = 3;
+}
+
+message {{StringJoin "Update" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Res"}} {
+  {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1; //{{.TableInfo.Name|StringCamel}}
   ExtraOpt extra_opt = 2;
 }
 
-message Mget{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Req {
-  repeated {{.ProtoContent.PrimaryIndexItem.GenItem.Type}} {{.ProtoContent.PrimaryIndexItem.GenItem.Name}} = 1;
+message {{StringJoin "Del" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Req"}} {
+  Key key = 1;
   ExtraOpt extra_opt = 2;
 }
 
-message Mget{{.TableInfo.CamelName}}By{{.ProtoContent.PrimaryIndexItem.GenItem.CamelName}}Res {
-  repeated {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1;
+message {{StringJoin "Del" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Res"}} {
+  ExtraOpt extra_opt = 2;
 }
 
+message {{StringJoin "Mget" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Req"}} {
+  repeated Key key = 1;
+  ExtraOpt extra_opt = 2;
+}
 
-message Search{{.TableInfo.CamelName}}Req {
+message {{StringJoin "Mget" (.TableInfo.Name|StringCamel) "By" (.ProtoContent.PrimaryIndexItem.Fields|ToCamelJoinAnd) "Res"}} {
+repeated {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1;
+}
+
+message Search{{.TableInfo.Name|StringCamel}}Req {
   int64 page = 1;       //page
   int64 pageSize = 2;   //pageSize
   int64 id = 3;         //id
   string name = 4;      //name
 }
 
-message Search{{.TableInfo.CamelName}}Res {
-  repeated {{.TableInfo.CamelName}} {{.TableInfo.Name}} = 1; //{{.TableInfo.CamelName}}
+message Search{{.TableInfo.Name|StringCamel}}Res {
+  repeated {{.TableInfo.Name|StringCamel}} {{.TableInfo.Name}} = 1; //{{.TableInfo.Name|StringCamel}}
 }
+

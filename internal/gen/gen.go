@@ -74,10 +74,6 @@ func Gen(gloabalConfig *common.GlobalConfig) {
 			logrus.Panicf("GenerateSchema faile: %s", err.Error())
 		}
 
-		tableInfo.UpperName = strings.ToUpper(tableInfo.Name)
-		tableInfo.CamelName = xstring.ToCamelWithStartUpper(tableInfo.Name)
-		tableInfo.FName = strings.ToLower(string(tableInfo.Name[0]))
-
 		genTemples(srvConfig, tableInfo, gloabalConfig.Option.Temples)
 		//gen.GenProto(srvConfig, tableInfo)
 	}
@@ -136,7 +132,8 @@ func genTemple(serviceConfig *common.ServiceConfig, tableInfo *common.TableInfo,
 	content.ProtoContent = genTableProtoContent(tableInfo)
 	content.GoStructContent = genGoStructContent(tableInfo)
 
-	tmpl, err := template.New("gen_temple").Parse(tpl)
+	tmpl, err := template.New("gen_temple").Funcs(GetTemplateFuncList()).Parse(tpl)
+
 	if err != nil {
 		logrus.Panicf("Parse proto template faile: %s", err.Error())
 	}
@@ -157,27 +154,35 @@ func genTableProtoContent(tableInfo *common.TableInfo) *common.ProtoContent {
 	content := new(common.ProtoContent)
 
 	content.ProtoItems = make([]*common.ProtoItem, len(tableInfo.Columns))
-	itemTypeMap := make(map[string]string)
+	protoItemMap := make(map[string]*common.ProtoItem)
 	for index, item := range tableInfo.Columns {
 		content.ProtoItems[index] = &common.ProtoItem{
-			Index: index + 1,
 			GenItem: common.GenItem{
-				Name:      item.Field,
-				NameUpper: strings.ToUpper(item.Field),
-				CamelName: xstring.ToCamelWithStartUpper(item.Field),
+				Name:    item.Field,
+				Comment: item.Comment,
 			},
 		}
 
 		content.ProtoItems[index].Type = getProtoType(item)
-		itemTypeMap[content.ProtoItems[index].GenItem.Name] = content.ProtoItems[index].Type
+		protoItemMap[content.ProtoItems[index].GenItem.Name] = content.ProtoItems[index]
 	}
 
 	// index
-	content.PrimaryIndexItem = new(common.ProtoItem)
-	content.PrimaryIndexItem.Name = tableInfo.PrimaryIndex.ColumnName
-	content.PrimaryIndexItem.CamelName = xstring.ToCamelWithStartUpper(content.PrimaryIndexItem.Name)
-	content.PrimaryIndexItem.NameUpper = strings.ToUpper(content.PrimaryIndexItem.Name)
-	content.PrimaryIndexItem.Type = itemTypeMap[content.PrimaryIndexItem.Name]
+	content.PrimaryIndexItem = new(common.ProtoIndexItem)
+	content.PrimaryIndexItem.Name = xstring.ToCamelWithStartUpper(tableInfo.PrimaryIndex.ColumnName[0])
+	if len(tableInfo.PrimaryIndex.ColumnName) > 0 {
+		for i := 1; i < len(tableInfo.PrimaryIndex.ColumnName); i++ {
+			content.PrimaryIndexItem.Name = content.PrimaryIndexItem.Name + "_" + tableInfo.PrimaryIndex.ColumnName[i]
+		}
+	}
+
+	content.PrimaryIndexItem.Fields = tableInfo.PrimaryIndex.ColumnName
+	content.PrimaryIndexItem.IndexItems = make([]*common.ProtoItem, len(content.PrimaryIndexItem.Fields))
+	for index, item := range content.PrimaryIndexItem.Fields {
+		content.PrimaryIndexItem.IndexItems[index] = protoItemMap[item]
+	}
+	content.PrimaryIndexItem.Type = ""
+	content.PrimaryIndexItem.Comment = tableInfo.PrimaryIndex.Comment
 
 	logrus.Debugf("ProtoContent: %+v", content)
 	return content
@@ -196,13 +201,13 @@ func getProtoType(col *common.Column) string {
 	case "bool":
 		return "bool"
 	case "tinyint", "smallint":
-		if strings.Contains(col.Field, "unsigned") {
+		if strings.Contains(col.Type, "unsigned") {
 			return "uint32"
 		} else {
 			return "int32"
 		}
 	case "int", "mediumint", "bigint":
-		if strings.Contains(col.Field, "unsigned") {
+		if strings.Contains(col.Type, "unsigned") {
 			return "uint64"
 		} else {
 			return "int64"
@@ -224,14 +229,12 @@ func genGoStructContent(tableInfo *common.TableInfo) *common.GoStructContent {
 		content.GoStructItems[index] = &common.GoStructItem{
 			Column: item,
 			GenItem: common.GenItem{
-				Name:      item.Field,
-				NameUpper: strings.ToUpper(item.Field),
-				CamelName: xstring.ToCamelWithStartUpper(item.Field),
+				Name:    item.Field,
+				Comment: item.Comment,
 			},
 		}
 
 		content.GoStructItems[index].Type = getGoStructType(item)
-
 	}
 
 	// index
@@ -257,13 +260,13 @@ func getGoStructType(col *common.Column) string {
 	case "bool":
 		return "bool"
 	case "tinyint", "smallint":
-		if strings.Contains(col.Field, "unsigned") {
+		if strings.Contains(col.Type, "unsigned") {
 			return "uint32"
 		} else {
 			return "int32"
 		}
 	case "int", "mediumint", "bigint":
-		if strings.Contains(col.Field, "unsigned") {
+		if strings.Contains(col.Type, "unsigned") {
 			return "uint64"
 		} else {
 			return "int64"
@@ -276,12 +279,4 @@ func getGoStructType(col *common.Column) string {
 	}
 
 	return ""
-}
-
-func parseCreateTable(createTable string) {
-	//lines := strings.Split(createTable, "\n")
-
-	//for _, line := range lines {
-	//if strings.Contains(line, "")
-	//}
 }
