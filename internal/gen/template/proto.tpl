@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package ="{{.GoPackage}}";
+option go_package ="../{{.GoPackage}}";
 
 package {{.Package}};
 
